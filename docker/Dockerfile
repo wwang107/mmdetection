@@ -18,3 +18,16 @@ RUN git clone https://github.com/open-mmlab/mmdetection.git /mmdetection
 WORKDIR /mmdetection
 ENV FORCE_CUDA="1"
 RUN pip install --no-cache-dir -e .
+RUN pip install Cython
+RUN pip install "git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI"
+# Download Model Checkpoint
+RUN mkdir checkpoints
+ADD checkpoints ./checkpoints
+
+RUN adduser --disabled-password --gecos -u $UID user
+USER user
+
+# -------- END OF USER-DEFINED COMMANDS --------
+# FOLLOWING, ONLY GENERATED COMMANDS ARE PERMITTED!
+
+

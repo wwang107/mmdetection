@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sudo docker build --tag='weiwang/bbextractor' .
+sudo docker build --tag='wwang107/bbextractor' .

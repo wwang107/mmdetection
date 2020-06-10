@@ -34,17 +34,23 @@ model = init_detector(config_file, checkpoint_file, device='cuda:0')
 
 vis = visdom.Visdom(port=8888)
 wind = None
+totalImages = 0
+totalBoxes = 0
 with open(IMAGE_LIST, "r") as imageList:
-    total = sum(1 for line in imageList)
+    totalImages = sum(1 for line in imageList)
+
+with open(OUT_FILEE, "r") as bboxList:
+    totalBoxes = sum(1 for line in bboxList)
 
 count = 0
-boxes = []
-with open(OUT_FILEE, "w") as outfile:
+with open(OUT_FILEE, "a") as outfile:
     with open(IMAGE_LIST, "r") as imageList:
         for item in imageList:
             count += 1
+            if count <= totalBoxes:
+                continue
             if count % 100 == 1:
-                print(f"[{count}/{total}]\n {item}")
+                print(f"[{count}/{totalImages}]\n {item}")
 
             subject, action, cameraId, frameId = item.rstrip("\n").split("/")
             img = os.path.join(
@@ -53,15 +59,16 @@ with open(OUT_FILEE, "w") as outfile:
             bbox = filter_dectection(inference_detector(model, img))
             num_box = bbox[0].shape[0]
             idx = 0
-            if num_box > 1:
+            if num_box > 1 or count == (totalBoxes + 1):
             # if there are more than 2 detections, we should list out and choose
                 wind = vis.image(
                     show_bbox(img, bbox),
                     win=wind)
                 idx = input("Choose a box to keep: ")
                 bbox = [bbox[0][int(idx),:]]
-                l, t, r, b = bbox[0][idx, 0].item(), bbox[0][idx, 1].item(),bbox[0][idx, 2].item(), bbox[0][idx, 3].item()
+                l, t, r, b = bbox[0][0].item(), bbox[0][1].item(),bbox[0][2].item(), bbox[0][3].item()
                 json.dump([l,t,r,b], outfile)
+                input("wait")
             elif num_box == 0:
                 json.dump([], outfile)
             else:
